@@ -28,10 +28,12 @@
         .result-section { background: #f8fff9; border-top: 3px solid #28a745; }
         .error-section { background: #f8d7da; border-top: 3px solid #dc3545; color: #721c24; }
         .animation-container { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
-        #animationCanvas { border: 2px solid #ddd; border-radius: 8px; background: white; }
+        #animationDisplay { border: 2px solid #ddd; border-radius: 8px; background: white; margin: 0 auto; display: block; }
         .loading { display: none; text-align: center; padding: 20px; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .controls { margin-top: 15px; }
+        .controls button { width: auto; margin: 5px; }
         footer { text-align: center; padding: 20px; background: #f8f9fa; color: #666; }
         @media (max-width: 600px) { header h1 { font-size: 2rem; } .example-buttons { grid-template-columns: 1fr; } body { padding: 10px; } }
     </style>
@@ -77,13 +79,13 @@
         <div id="resultSection" class="result-section">
             <h2>✅ Your Animation is Ready!</h2>
             <div class="animation-container">
-                <canvas id="animationCanvas" width="400" height="400"></canvas>
+                <div id="animationDisplay"></div>
             </div>
             <div class="controls">
-                <button id="playBtn" style="width: auto; margin: 5px;">▶️ Play</button>
-                <button id="stopBtn" style="width: auto; margin: 5px;">⏹️ Stop</button>
-                <button id="downloadBtn" style="width: auto; margin: 5px;">📥 Download as GIF</button>
+                <button id="playBtn">▶️ Play Animation</button>
+                <button id="stopBtn">⏹️ Stop</button>
             </div>
+            <p id="frameCount" style="margin-top: 15px; color: #666;"></p>
         </div>
 
         <div id="errorSection" class="error-section">
@@ -127,6 +129,7 @@
                 if (data.success) {
                     animationFrames = data.frames;
                     currentFrame = 0;
+                    document.getElementById('frameCount').textContent = `Total frames: ${animationFrames.length}`;
                     playAnimation();
                     resultSection.style.display = 'block';
                     resultSection.scrollIntoView({ behavior: 'smooth' });
@@ -151,16 +154,7 @@
             currentFrame = 0;
             animationInterval = setInterval(() => {
                 if (currentFrame < animationFrames.length) {
-                    const canvas = document.getElementById('animationCanvas');
-                    const ctx = canvas.getContext('2d');
-                    const img = new Image();
-                    
-                    img.onload = function() {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    };
-                    
-                    img.src = animationFrames[currentFrame];
+                    document.getElementById('animationDisplay').innerHTML = animationFrames[currentFrame];
                     currentFrame++;
                 } else {
                     currentFrame = 0; // Loop
@@ -178,15 +172,19 @@
         document.getElementById('playBtn').addEventListener('click', playAnimation);
         document.getElementById('stopBtn').addEventListener('click', stopAnimation);
 
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            if (animationFrames.length > 0) {
-                alert('Animation ready! In a full version, this would download as GIF.');
-            }
-        });
-
         function retry() {
             document.getElementById('errorSection').style.display = 'none';
         }
+
+        // Display first frame when page loads
+        document.getElementById('animationDisplay').innerHTML = `
+            <svg width="400" height="400" viewBox="0 0 400 400">
+                <rect width="400" height="400" fill="white"/>
+                <text x="200" y="200" text-anchor="middle" fill="#666" font-family="Arial" font-size="20">
+                    Your animation will appear here
+                </text>
+            </svg>
+        `;
     </script>
 </body>
 </html>
